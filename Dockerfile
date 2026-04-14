@@ -39,4 +39,4 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 #Apache configure
 RUN a2enmod rewrite
 
-ENTRYPOINT chmod 777 -R /var/www/html && apache2-foreground
+ENTRYPOINT exec chmod 777 -R /var/www/html && apache2-foreground
