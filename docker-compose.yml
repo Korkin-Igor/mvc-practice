@@ -1,8 +1,17 @@
+version: '3'
+
+networks:
+  default:
+    name: ${PROJECT_NAME:-project}-network
+    driver: bridge
+
+volumes:
+  db-dev:
+
 services:
   php:
     build:
       context: ./
-      dockerfile: ./Dockerfile
       args:
         USER: ${USER:-user}
         PASSWORD: ${PASSWORD:-password}
@@ -41,11 +50,3 @@ services:
       - PMA_HOST=db
     depends_on:
       - db
-
-networks:
-  default:
-    name: ${PROJECT_NAME:-project}-network
-    driver: bridge
-
-volumes:
-  db-dev:
