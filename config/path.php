@@ -3,7 +3,7 @@ return [
     //Адрес относительно домена
     'root' => 'project',
     //Настройка директории с маршрутами
-    'routes' => 'routes',
+    'routes' => 'project/routes',
     //Настройка директории с представлениями
-    'views' => 'views'
+    'views' => 'project/views'
 ];
