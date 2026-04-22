@@ -16,12 +16,12 @@ class ComposerStaticInitd502e32e71d172aa5b34c412e237dfe6
     public static $prefixDirsPsr4 = array (
         'Src\\' =>
         array (
-            0 => __DIR__ . '/../..' . '/core/Src',
+            0 => __DIR__ . '/../..' . '/project/core/Src',
         ),
     );
 
     public static $fallbackDirsPsr4 = array (
-        0 => __DIR__ . '/../..' . '/app',
+        0 => __DIR__ . '/../..' . '/project/app',
     );
 
     public static $classMap = array (
