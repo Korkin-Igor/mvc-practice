@@ -1,0 +1,22 @@
+{
+    "name": "korkin-igor/mvc-practice",
+    "description": "Practice mvc php",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Korkin-Igor",
+            "email": "korkinigor1211@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": "^7.4 | ^8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Src\\": "core/Src/",
+            "": "app/"
+        }
+    }
+}
