@@ -1,11 +1,11 @@
 <?php
 namespace Controller;
 
-use Model\User;
-use Src\Request;
-use Model\Post;
-use Src\View;
+use app\Model\Post;
+use app\Model\User;
 use Src\Auth\Auth;
+use Src\Request;
+use Src\View;
 
 class Site
 {
