@@ -8,9 +8,9 @@ use Src\View;
 
 class Site
 {
-    public function index(Request $request): string
+    public function index(): string
     {
-        $posts = Post::where('id', $request->id)->get();
+        $posts = Post::all();
         return (new View())->render('site.post', ['posts' => $posts]);
     }
 
