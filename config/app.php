@@ -3,5 +3,9 @@ return [
     //Класс аутентификации
     'auth' => \Src\Auth\Auth::class,
     //Класс пользователя
-    'identity'=> \app\Model\User::class
+    'identity' => \Model\User::class,
+    //Классы для middleware
+    'routeMiddleware' => [
+        'auth' => \Middlewares\AuthMiddleware::class,
+    ]
 ];
