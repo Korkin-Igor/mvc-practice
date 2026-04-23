@@ -1,9 +1,9 @@
 <?php
 return [
     //Адрес относительно домена
-    'root' => 'project',
+    'root' => '',
     //Настройка директории с маршрутами
-    'routes' => 'project/routes',
+    'routes' => 'routes',
     //Настройка директории с представлениями
-    'views' => 'project/views'
+    'views' => 'views'
 ];
