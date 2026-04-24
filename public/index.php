@@ -1,6 +1,10 @@
 <?php
 //Включаем запрет на неявное преобразование типов
 declare(strict_types=1);
+
+// Скрываем deprecation-сообщения из устаревших зависимостей, не отключая остальные ошибки.
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
+
 //Включаем сессии на все страницы
 session_start();
 

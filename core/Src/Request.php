@@ -7,6 +7,7 @@ use Error;
 class Request
 {
     protected array $body;
+    protected bool $stopped = false;
     public string $method;
     public array $headers;
 
@@ -35,6 +36,16 @@ class Request
     public function files(): array
     {
         return $_FILES;
+    }
+
+    public function stop(): void
+    {
+        $this->stopped = true;
+    }
+
+    public function isStopped(): bool
+    {
+        return $this->stopped;
     }
 
     public function __get($key)

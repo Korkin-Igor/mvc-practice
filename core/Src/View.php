@@ -56,8 +56,10 @@ class View
             //Помещаем буфер в переменную и очищаем его
             $content = ob_get_clean();
 
-            //Возвращаем собранную страницу
-            return require($this->getPathToMain());
+            //Собираем основной шаблон и возвращаем готовую страницу
+            ob_start();
+            require $this->getPathToMain();
+            return ob_get_clean();
         }
         throw new Exception('Error render');
     }

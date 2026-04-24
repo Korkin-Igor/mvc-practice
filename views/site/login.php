@@ -1,13 +1,35 @@
-<h2>Авторизация</h2>
-<h3><?= $message ?? ''; ?></h3>
+<section class="auth-screen">
+    <div class="auth-card">
+        <div class="auth-card__brand" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <p class="eyebrow"><?= ($preferredRole ?? 'reader') === 'librarian' ? 'Рабочее место библиотекаря' : 'Личный кабинет читателя' ?></p>
+        <h1>Вход</h1>
 
-<h3><?= app()->auth->user()->name ?? ''; ?></h3>
-<?php
-if (!app()->auth::check()):
-    ?>
-    <form method="post">
-        <label>Логин <input type="text" name="login"></label>
-        <label>Пароль <input type="password" name="password"></label>
-        <button>Войти</button>
-    </form>
-<?php endif;
+        <?php if (!empty($message)): ?>
+            <div class="inline-message inline-message--error"><?= htmlspecialchars($message) ?></div>
+        <?php endif; ?>
+
+        <form class="auth-form" method="post">
+            <label class="field">
+                <span>Логин</span>
+                <input type="text" name="login" placeholder="Введите логин" required>
+            </label>
+
+            <label class="field">
+                <span>Пароль</span>
+                <input type="password" name="password" placeholder="Введите пароль" required>
+            </label>
+
+            <button class="button button--block" type="submit">Войти</button>
+        </form>
+
+        <p class="auth-note">
+            Нет аккаунта?
+            <a href="<?= app()->route->getUrl('/signup') ?>">Зарегистрироваться</a>
+        </p>
+    </div>
+</section>
