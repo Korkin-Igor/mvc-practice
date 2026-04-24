@@ -3,11 +3,26 @@
 namespace Service;
 
 use Model\User;
+use Service\Contracts\AuthenticatorInterface;
+use Service\Contracts\AuthUserRepositoryInterface;
+use Service\Gateways\EloquentAuthUserRepository;
+use Service\Gateways\NativeAuthenticator;
 use Src\Auth\Auth;
 use Throwable;
 
 class AuthService
 {
+    private AuthUserRepositoryInterface $users;
+    private AuthenticatorInterface $authenticator;
+
+    public function __construct(
+        ?AuthUserRepositoryInterface $users = null,
+        ?AuthenticatorInterface $authenticator = null
+    ) {
+        $this->users = $users ?? new EloquentAuthUserRepository();
+        $this->authenticator = $authenticator ?? new NativeAuthenticator();
+    }
+
     public function registerReader(string $name, string $login, string $password): OperationResult
     {
         if ($name === '' || $login === '' || $password === '') {
@@ -15,11 +30,11 @@ class AuthService
         }
 
         try {
-            if (User::where('login', $login)->exists()) {
+            if ($this->users->loginExists($login)) {
                 return OperationResult::failure('Пользователь с таким логином уже существует.');
             }
 
-            User::create([
+            $this->users->create([
                 'name' => $name,
                 'login' => $login,
                 'password' => $password,
@@ -34,7 +49,7 @@ class AuthService
 
     public function attemptLogin(array $credentials): OperationResult
     {
-        if (Auth::attempt($credentials)) {
+        if ($this->authenticator->attempt($credentials)) {
             return OperationResult::success();
         }
 

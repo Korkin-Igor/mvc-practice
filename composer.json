@@ -23,5 +23,10 @@
             "Src\\": "core/Src/",
             "": "app/"
         }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
     }
 }

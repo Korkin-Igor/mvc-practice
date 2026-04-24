@@ -8,6 +8,8 @@ use Model\Book;
 use Model\BookCopy;
 use Model\Booking;
 use Model\User;
+use Service\Contracts\BookingGatewayInterface;
+use Service\Gateways\EloquentBookingGateway;
 use Throwable;
 use function Collect\collection;
 
@@ -24,28 +26,31 @@ class BookingService
     private const BOOKING_OVERDUE = 4;
     private const BOOKING_CANCELLED = 5;
 
+    private BookingGatewayInterface $gateway;
+
+    public function __construct(?BookingGatewayInterface $gateway = null)
+    {
+        $this->gateway = $gateway ?? new EloquentBookingGateway();
+    }
+
     public function reserveBook(User $user, int $bookId): OperationResult
     {
         try {
-            $book = Book::find($bookId);
+            $book = $this->gateway->findBook($bookId);
             if (!$book) {
                 return OperationResult::failure('Книга не найдена.');
             }
 
-            if ($this->hasOpenBookingForBook($user->id, $bookId)) {
+            if ($this->gateway->hasOpenBookingForBook($user->id, $bookId)) {
                 return OperationResult::failure('У вас уже есть активная бронь или заявка на эту книгу.');
             }
 
-            $copy = BookCopy::where('book_id', $bookId)
-                ->where('status_id', self::COPY_IN_ROOM)
-                ->orderBy('id')
-                ->first();
-
+            $copy = $this->gateway->findFirstAvailableCopy($bookId, self::COPY_IN_ROOM);
             if (!$copy) {
                 return OperationResult::failure('Свободных экземпляров сейчас нет.');
             }
 
-            Booking::create([
+            $this->gateway->createBooking([
                 'book_copy_id' => $copy->id,
                 'reader_id' => $user->id,
                 'approved_by' => null,
@@ -66,15 +71,13 @@ class BookingService
     public function extendBooking(User $user, int $bookingId): OperationResult
     {
         try {
-            $booking = Booking::with(['copy.storagePlace', 'status'])
-                ->where('reader_id', $user->id)
-                ->find($bookingId);
+            $booking = $this->gateway->findReaderBooking($user->id, $bookingId);
 
             if (!$booking || (int) $booking->status_id !== self::BOOKING_APPROVED) {
                 return OperationResult::failure('Продлить можно только активную выдачу.');
             }
 
-            if ($this->hasQueue($booking)) {
+            if ($this->gateway->hasQueue($booking)) {
                 return OperationResult::failure('Продление недоступно: на экземпляр уже есть очередь.');
             }
 
@@ -94,7 +97,7 @@ class BookingService
     public function updateByLibrarian(User $user, int $bookingId, string $action): OperationResult
     {
         try {
-            $booking = Booking::with(['copy.storagePlace', 'status'])->find($bookingId);
+            $booking = $this->gateway->findBooking($bookingId);
             if (!$booking) {
                 return OperationResult::failure('Бронирование не найдено.');
             }
@@ -117,13 +120,7 @@ class BookingService
     public function getReaderBookings(User $user): array
     {
         try {
-            $items = collection(
-                Booking::with(['copy.book', 'copy.status', 'status'])
-                    ->where('reader_id', $user->id)
-                    ->orderBy('created_at', 'desc')
-                    ->get()
-                    ->all()
-            )
+            $items = collection($this->gateway->getReaderBookings($user->id))
                 ->map(fn (Booking $booking): array => $this->buildReaderBookingCard($booking))
                 ->toArray();
 
@@ -136,12 +133,7 @@ class BookingService
     public function getLibrarianBookings(): array
     {
         try {
-            $items = collection(
-                Booking::with(['copy.book', 'reader', 'status'])
-                    ->orderBy('created_at', 'desc')
-                    ->get()
-                    ->all()
-            )
+            $items = collection($this->gateway->getLibrarianBookings())
                 ->map(fn (Booking $booking): array => $this->buildLibrarianBookingCard($booking))
                 ->toArray();
 
@@ -155,17 +147,11 @@ class BookingService
     {
         $ids = [];
 
-        collection(
-            Booking::with('copy')
-                ->where('reader_id', $user->id)
-                ->whereIn('status_id', [
-                    self::BOOKING_PENDING,
-                    self::BOOKING_APPROVED,
-                    self::BOOKING_OVERDUE,
-                ])
-                ->get()
-                ->all()
-        )->each(function (Booking $booking) use (&$ids): void {
+        collection($this->gateway->getReaderOpenBookings($user->id, [
+            self::BOOKING_PENDING,
+            self::BOOKING_APPROVED,
+            self::BOOKING_OVERDUE,
+        ]))->each(function (Booking $booking) use (&$ids): void {
             $bookId = (int) ($booking->copy->book_id ?? 0);
             if ($bookId > 0) {
                 $ids[$bookId] = true;
@@ -215,7 +201,8 @@ class BookingService
         $booking->approved_by = $user->id;
 
         if ($booking->copy) {
-            $booking->copy->status_id = $this->hasPendingRequestsForCopy($booking->book_copy_id)
+            $copyId = (int) ($booking->book_copy_id ?? $booking->copy->id ?? 0);
+            $booking->copy->status_id = $this->gateway->hasPendingRequestsForCopy($copyId)
                 ? self::COPY_RESERVED
                 : $this->availableCopyStatusId($booking->copy);
             $booking->copy->save();
@@ -228,7 +215,7 @@ class BookingService
     {
         return $this->buildBaseBookingCard(
             $booking,
-            (int) $booking->status_id === self::BOOKING_APPROVED && !$this->hasQueue($booking)
+            (int) $booking->status_id === self::BOOKING_APPROVED && !$this->gateway->hasQueue($booking)
         );
     }
 
@@ -347,35 +334,6 @@ class BookingService
         });
 
         return $groups;
-    }
-
-    private function hasQueue(Booking $booking): bool
-    {
-        return Booking::where('book_copy_id', $booking->book_copy_id)
-            ->where('status_id', self::BOOKING_PENDING)
-            ->where('id', '<>', $booking->id)
-            ->exists();
-    }
-
-    private function hasOpenBookingForBook(int $readerId, int $bookId): bool
-    {
-        return Booking::where('reader_id', $readerId)
-            ->whereIn('status_id', [
-                self::BOOKING_PENDING,
-                self::BOOKING_APPROVED,
-                self::BOOKING_OVERDUE,
-            ])
-            ->whereHas('copy', function ($builder) use ($bookId) {
-                $builder->where('book_id', $bookId);
-            })
-            ->exists();
-    }
-
-    private function hasPendingRequestsForCopy(int $copyId): bool
-    {
-        return Booking::where('book_copy_id', $copyId)
-            ->where('status_id', self::BOOKING_PENDING)
-            ->exists();
     }
 
     private function availableCopyStatusId(BookCopy $copy): int
