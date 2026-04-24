@@ -93,7 +93,7 @@ class Route
             case Dispatcher::FOUND:
                 $handler = $routeInfo[1];
                 $vars = array_values($routeInfo[2]);
-                $request = Middleware::single()->runMiddlewares($httpMethod, $uri);
+                $request = Middleware::single()->go($httpMethod, $uri, new Request());
                 if ($request->isStopped()) {
                     return;
                 }

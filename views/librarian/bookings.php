@@ -38,35 +38,38 @@ $labels = [
                 <?php foreach ($bookingGroups[$groupName] as $item): ?>
                     <article class="booking-card">
                         <div class="booking-card__main">
-                            <strong><?= htmlspecialchars($item['name']) ?></strong>
-                            <span><?= htmlspecialchars($item['author']) ?></span>
-                            <small><?= htmlspecialchars($item['reader_name'] ?? '') ?></small>
+                            <strong><?= htmlspecialchars($item['name'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false) ?></strong>
+                            <span><?= htmlspecialchars($item['author'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false) ?></span>
+                            <small><?= htmlspecialchars($item['reader_name'] ?? '', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false) ?></small>
                         </div>
                         <div class="booking-card__meta">
-                            <span><?= htmlspecialchars($item['hint']) ?></span>
-                            <small>С <?= htmlspecialchars($item['created_at']) ?> до <?= htmlspecialchars($item['due_date']) ?></small>
+                            <span><?= htmlspecialchars($item['hint'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false) ?></span>
+                            <small>С <?= htmlspecialchars($item['created_at'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false) ?> до <?= htmlspecialchars($item['due_date'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false) ?></small>
                         </div>
                         <div class="booking-card__actions booking-card__actions--stack">
                             <?php if (!empty($item['can_approve'])): ?>
                                 <form method="post" action="<?= app()->route->getUrl('/bookings/' . $item['id'] . '/approve') ?>">
+                                    <input name="csrf_token" type="hidden" value="<?= app()->auth::generateCSRF() ?>">
                                     <button class="button button--small" type="submit">Подтвердить</button>
                                 </form>
                             <?php endif; ?>
 
                             <?php if (!empty($item['can_reject'])): ?>
                                 <form method="post" action="<?= app()->route->getUrl('/bookings/' . $item['id'] . '/reject') ?>">
+                                    <input name="csrf_token" type="hidden" value="<?= app()->auth::generateCSRF() ?>">
                                     <button class="button button--small button--ghost" type="submit">Отказать</button>
                                 </form>
                             <?php endif; ?>
 
                             <?php if (!empty($item['can_return'])): ?>
                                 <form method="post" action="<?= app()->route->getUrl('/bookings/' . $item['id'] . '/return') ?>">
+                                    <input name="csrf_token" type="hidden" value="<?= app()->auth::generateCSRF() ?>">
                                     <button class="button button--small" type="submit">Вернуть</button>
                                 </form>
                             <?php endif; ?>
 
                             <?php if (empty($item['can_approve']) && empty($item['can_reject']) && empty($item['can_return'])): ?>
-                                <span class="badge"><?= htmlspecialchars($item['status']) ?></span>
+                                <span class="badge"><?= htmlspecialchars($item['status'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false) ?></span>
                             <?php endif; ?>
                         </div>
                     </article>

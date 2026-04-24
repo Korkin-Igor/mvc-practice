@@ -7,9 +7,27 @@ use Src\Auth\Auth;
 use Src\Request;
 use Src\Session;
 use Src\View;
+use Src\Validator\Validator;
 
 abstract class BaseController
 {
+    protected function validate(array $fields, array $rules, array $messages = []): Validator
+    {
+        return new Validator($fields, $rules, $messages);
+    }
+
+    protected function validationMessage(Validator $validator): string
+    {
+        $messages = [];
+        foreach ($validator->errors() as $fieldErrors) {
+            foreach ($fieldErrors as $error) {
+                $messages[] = $error;
+            }
+        }
+
+        return implode(' ', $messages);
+    }
+
     protected function redirectIfAuthenticated(): ?string
     {
         $user = Auth::user();

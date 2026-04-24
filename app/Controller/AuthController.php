@@ -6,6 +6,7 @@ use Model\User;
 use Service\AuthService;
 use Src\Auth\Auth;
 use Src\Request;
+use Src\Validator\Validator;
 
 class AuthController extends BaseController
 {
@@ -25,18 +26,23 @@ class AuthController extends BaseController
 
         $message = '';
         if ($request->method === 'POST') {
-            $result = $this->authService->registerReader(
-                $this->input($request, 'name'),
-                $this->input($request, 'login'),
-                $this->input($request, 'password')
-            );
+            $validator = $this->signupValidator($request);
+            if ($validator->fails()) {
+                $message = $this->validationMessage($validator);
+            } else {
+                $result = $this->authService->registerReader(
+                    $this->input($request, 'name'),
+                    $this->input($request, 'login'),
+                    $this->input($request, 'password')
+                );
 
-            if ($result->isSuccess()) {
-                $this->flash('success', $result->getMessage());
-                return $this->redirect('/login?role=reader');
+                if ($result->isSuccess()) {
+                    $this->flash('success', $result->getMessage());
+                    return $this->redirect('/login?role=reader');
+                }
+
+                $message = $result->getMessage();
             }
-
-            $message = $result->getMessage();
         }
 
         return $this->renderPage('site.signup', [
@@ -55,17 +61,22 @@ class AuthController extends BaseController
 
         $message = '';
         if ($request->method === 'POST') {
-            $result = $this->authService->attemptLogin($request->all());
-            if ($result->isSuccess()) {
-                $user = Auth::user();
-                if ($user instanceof User) {
-                    return $this->redirect($this->defaultRouteFor($user));
+            $validator = $this->loginValidator($request);
+            if ($validator->fails()) {
+                $message = $this->validationMessage($validator);
+            } else {
+                $result = $this->authService->attemptLogin($request->all());
+                if ($result->isSuccess()) {
+                    $user = Auth::user();
+                    if ($user instanceof User) {
+                        return $this->redirect($this->defaultRouteFor($user));
+                    }
+
+                    return $this->redirect('/');
                 }
 
-                return $this->redirect('/');
+                $message = $result->getMessage();
             }
-
-            $message = $result->getMessage();
         }
 
         return $this->renderPage('site.login', [
@@ -81,5 +92,27 @@ class AuthController extends BaseController
         Auth::logout();
         $this->flash('success', 'Сессия завершена.');
         return $this->redirect('/');
+    }
+
+    private function signupValidator(Request $request): Validator
+    {
+        return $this->validate($request->all(), [
+            'name' => ['required'],
+            'login' => ['required', 'unique:users,login'],
+            'password' => ['required'],
+        ], [
+            'required' => 'Поле :field пусто',
+            'unique' => 'Поле :field должно быть уникально',
+        ]);
+    }
+
+    private function loginValidator(Request $request): Validator
+    {
+        return $this->validate($request->all(), [
+            'login' => ['required'],
+            'password' => ['required'],
+        ], [
+            'required' => 'Поле :field пусто',
+        ]);
     }
 }

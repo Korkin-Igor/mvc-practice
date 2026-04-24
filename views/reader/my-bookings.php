@@ -38,20 +38,21 @@ $labels = [
                 <?php foreach ($bookingGroups[$groupName] as $item): ?>
                     <article class="booking-card">
                         <div class="booking-card__main">
-                            <strong><?= htmlspecialchars($item['name']) ?></strong>
-                            <span><?= htmlspecialchars($item['author']) ?></span>
+                            <strong><?= htmlspecialchars($item['name'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false) ?></strong>
+                            <span><?= htmlspecialchars($item['author'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false) ?></span>
                         </div>
                         <div class="booking-card__meta">
-                            <span><?= htmlspecialchars($item['hint']) ?></span>
-                            <small>Дата возврата <?= htmlspecialchars($item['due_date']) ?></small>
+                            <span><?= htmlspecialchars($item['hint'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false) ?></span>
+                            <small>Дата возврата <?= htmlspecialchars($item['due_date'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false) ?></small>
                         </div>
                         <div class="booking-card__actions">
                             <?php if (!empty($item['can_extend'])): ?>
                                 <form method="post" action="<?= app()->route->getUrl('/my-bookings/' . $item['id'] . '/extend') ?>">
+                                    <input name="csrf_token" type="hidden" value="<?= app()->auth::generateCSRF() ?>">
                                     <button class="button button--small" type="submit">Продлить</button>
                                 </form>
                             <?php else: ?>
-                                <span class="badge"><?= htmlspecialchars($item['status']) ?></span>
+                                <span class="badge"><?= htmlspecialchars($item['status'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false) ?></span>
                             <?php endif; ?>
                         </div>
                     </article>

@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title><?= htmlspecialchars(($pageTitle ?? $appName) . ' | ' . $appName) ?></title>
+    <title><?= htmlspecialchars(($pageTitle ?? $appName) . ' | ' . $appName, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false) ?></title>
     <link rel="stylesheet" href="<?= app()->route->getUrl('/public/assets/app.css') ?>">
 </head>
-<body class="<?= htmlspecialchars($pageClass ?? '') ?>">
+<body class="<?= htmlspecialchars($pageClass ?? '', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false) ?>">
 <div class="page-shell">
     <header class="site-header <?= empty($navItems) ? 'site-header--minimal' : '' ?>">
         <a class="brand" href="<?= app()->route->getUrl('/') ?>">
@@ -17,7 +17,7 @@
                 <span></span>
                 <span></span>
             </span>
-            <span class="brand-name"><?= htmlspecialchars($appName) ?></span>
+            <span class="brand-name"><?= htmlspecialchars($appName, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false) ?></span>
         </a>
 
         <?php if (!empty($navItems)): ?>
@@ -27,7 +27,7 @@
                         class="site-nav__link <?= ($activeNav ?? '') === $item['id'] ? 'is-active' : '' ?>"
                         href="<?= app()->route->getUrl($item['url']) ?>"
                     >
-                        <?= htmlspecialchars($item['label']) ?>
+                        <?= htmlspecialchars($item['label'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false) ?>
                     </a>
                 <?php endforeach; ?>
             </nav>
@@ -35,7 +35,7 @@
             <div class="site-user">
                 <div class="site-user__avatar"><?= mb_substr($currentUser->name ?? 'U', 0, 1, 'UTF-8') ?></div>
                 <div class="site-user__meta">
-                    <strong><?= htmlspecialchars($currentUser->name ?? '') ?></strong>
+                    <strong><?= htmlspecialchars($currentUser->name ?? '', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false) ?></strong>
                     <span><?= ($currentUser && $currentUser->isLibrarian()) ? 'Библиотекарь' : 'Читатель' ?></span>
                 </div>
                 <a class="button button--ghost button--small" href="<?= app()->route->getUrl('/logout') ?>">Выйти</a>
@@ -49,8 +49,8 @@
     </header>
 
     <?php if (!empty($flash)): ?>
-        <div class="flash flash--<?= htmlspecialchars($flash['type']) ?>">
-            <?= htmlspecialchars($flash['message']) ?>
+        <div class="flash flash--<?= htmlspecialchars($flash['type'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false) ?>">
+            <?= htmlspecialchars($flash['message'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false) ?>
         </div>
     <?php endif; ?>
 

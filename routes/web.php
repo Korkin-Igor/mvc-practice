@@ -22,6 +22,8 @@ Route::add('POST', '/my-bookings/{id:\d+}/extend', [Controller\ReaderController:
 
 Route::add('GET', '/storage', [Controller\LibrarianController::class, 'storage'])
     ->middleware('auth', 'role:librarian');
+Route::add('POST', '/storage/books', [Controller\LibrarianController::class, 'createBook'])
+    ->middleware('auth', 'role:librarian');
 Route::add('GET', '/bookings', [Controller\LibrarianController::class, 'bookings'])
     ->middleware('auth', 'role:librarian');
 Route::add('POST', '/bookings/{id:\d+}/approve', [Controller\LibrarianController::class, 'approveBooking'])

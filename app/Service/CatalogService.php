@@ -5,6 +5,7 @@ namespace Service;
 use Model\Book;
 use Model\BookCopy;
 use Model\BookCopyStatus;
+use Model\StoragePlace;
 use Throwable;
 
 class CatalogService
@@ -40,6 +41,7 @@ class CatalogService
                     'author' => $book->author ?: 'Автор не указан',
                     'description' => $book->description ?: 'Краткое описание пока не заполнено.',
                     'link' => $book->link,
+                    'cover_url' => $this->coverUrl((int) $book->id),
                     'available_copies' => $availableCopies,
                     'can_reserve' => $availableCopies > 0 && !$hasOpenBooking,
                     'reserve_label' => $hasOpenBooking
@@ -106,5 +108,37 @@ class CatalogService
         } catch (Throwable $exception) {
             return [];
         }
+    }
+
+    public function getStoragePlaces(): array
+    {
+        try {
+            $items = [];
+            foreach (StoragePlace::query()->orderBy('name')->get() as $place) {
+                $items[] = [
+                    'id' => $place->id,
+                    'name' => $place->name,
+                ];
+            }
+
+            return $items;
+        } catch (Throwable $exception) {
+            return [];
+        }
+    }
+
+    private function coverUrl(int $bookId): ?string
+    {
+        $matches = glob($this->projectRoot() . '/public/uploads/covers/book-' . $bookId . '.*');
+        if (!$matches) {
+            return null;
+        }
+
+        return '/public/uploads/covers/' . basename($matches[0]);
+    }
+
+    private function projectRoot(): string
+    {
+        return dirname(__DIR__, 2);
     }
 }

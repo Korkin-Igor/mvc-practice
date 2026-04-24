@@ -10,10 +10,11 @@
         <h1>Вход</h1>
 
         <?php if (!empty($message)): ?>
-            <div class="inline-message inline-message--error"><?= htmlspecialchars($message) ?></div>
+            <div class="inline-message inline-message--error"><?= htmlspecialchars($message, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false) ?></div>
         <?php endif; ?>
 
         <form class="auth-form" method="post">
+            <input name="csrf_token" type="hidden" value="<?= app()->auth::generateCSRF() ?>">
             <label class="field">
                 <span>Логин</span>
                 <input type="text" name="login" placeholder="Введите логин" required>
