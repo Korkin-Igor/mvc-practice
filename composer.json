@@ -21,7 +21,14 @@
     "autoload": {
         "psr-4": {
             "Src\\": "core/Src/",
-            "": "app/"
+            "Controller\\": "app/Controller/",
+            "Middlewares\\": "app/Middlewares/",
+            "Model\\": "app/Model/",
+            "Providers\\": "app/Providers/",
+            "Service\\": "app/Service/",
+            "Validators\\": "app/Validators/",
+            "app\\Interfaces\\": "app/Interfaces/",
+            "app\\Repositories\\": "app/Repositories/"
         }
     },
     "autoload-dev": {

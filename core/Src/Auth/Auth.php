@@ -6,26 +6,25 @@ use Src\Session;
 
 class Auth
 {
-    //Свойство для хранения любого класса, реализующего интерфейс IdentityInterface
     private static IdentityInterface $user;
+    private static ?TokenIdentityResolverInterface $tokenResolver = null;
 
-    //Инициализация класса пользователя
     public static function init(IdentityInterface $user): void
     {
         self::$user = $user;
-        if (self::user()) {
-            self::login(self::user());
-        }
     }
 
-    //Вход пользователя по модели
+    public static function setTokenResolver(?TokenIdentityResolverInterface $resolver = null): void
+    {
+        self::$tokenResolver = $resolver;
+    }
+
     public static function login(IdentityInterface $user): void
     {
         self::$user = $user;
         Session::set('id', self::$user->getId());
     }
 
-    //Аутентификация пользователя и вход по учетным данным
     public static function attempt(array $credentials): bool
     {
         if ($user = self::$user->attemptIdentity($credentials)) {
@@ -35,30 +34,32 @@ class Auth
         return false;
     }
 
-    //Возврат текущего аутентифицированного пользователя
     public static function user()
     {
+        $token = self::bearerToken();
+        if ($token !== null) {
+            if (!self::$tokenResolver) {
+                return null;
+            }
+
+            return self::$tokenResolver->resolveIdentityByToken($token);
+        }
+
         $id = Session::get('id') ?? 0;
-        return self::$user->findIdentity($id);
+        return self::$user->findIdentity((int) $id);
     }
 
-    //Проверка является ли текущий пользователь аутентифицированным
     public static function check(): bool
     {
-        if (self::user()) {
-            return true;
-        }
-        return false;
+        return self::user() !== null;
     }
 
-    //Выход текущего пользователя
     public static function logout(): bool
     {
         Session::clear('id');
         return true;
     }
 
-    //Генерация нового токена для CSRF
     public static function generateCSRF(): string
     {
         $token = Session::get('csrf_token');
@@ -71,4 +72,24 @@ class Auth
         return $token;
     }
 
+    private static function bearerToken(): ?string
+    {
+        $header = '';
+
+        if (function_exists('getallheaders')) {
+            $headers = getallheaders();
+            $header = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+        }
+
+        if ($header === '') {
+            $header = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+        }
+
+        if (stripos($header, 'Bearer ') !== 0) {
+            return null;
+        }
+
+        $token = trim(substr($header, 7));
+        return $token !== '' ? $token : null;
+    }
 }

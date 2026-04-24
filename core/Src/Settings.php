@@ -23,16 +23,39 @@ class Settings
 
     public function getRootPath(): string
     {
-        return $this->path['root'] ? '/' . $this->path['root'] : '';
+        $root = $this->path['root'] ?? '';
+        return $root ? '/' . $root : '';
     }
 
     public function getViewsPath(): string
     {
-        return '/' . $this->path['views'] ?? '';
+        $path = $this->path['views'] ?? '';
+        return $path ? '/' . $path : '';
+    }
+
+    public function getRoutePath(): string
+    {
+        $path = $this->path['routes'] ?? '';
+        return $path ? '/' . $path : '';
     }
 
     public function getDbSetting(): array
     {
         return $this->db ?? [];
+    }
+
+    public function getAuthClassName(): string
+    {
+        return $this->app['auth'] ?? '';
+    }
+
+    public function getIdentityClassName(): string
+    {
+        return $this->app['identity'] ?? '';
+    }
+
+    public function removeAppMiddleware(string $key): void
+    {
+        unset($this->_settings['app']['routeAppMiddleware'][$key]);
     }
 }
