@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
+use app\Interfaces\BookingGatewayInterface;
 use DateInterval;
 use DateTimeImmutable;
 use Service\BookingService;
-use Service\Contracts\BookingGatewayInterface;
 use Tests\TestCase;
 
 final class BookingServiceTest extends TestCase

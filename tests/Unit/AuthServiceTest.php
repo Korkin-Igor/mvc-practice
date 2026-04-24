@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
+use app\Interfaces\AuthenticatorInterface;
+use app\Interfaces\AuthUserRepositoryInterface;
 use Model\User;
 use Service\AuthService;
-use Service\Contracts\AuthenticatorInterface;
-use Service\Contracts\AuthUserRepositoryInterface;
 use Tests\TestCase;
 
 final class AuthServiceTest extends TestCase

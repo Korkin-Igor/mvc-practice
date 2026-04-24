@@ -2,14 +2,13 @@
 
 namespace Service;
 
+use app\Interfaces\BookingGatewayInterface;
+use app\Repositories\EloquentBookingGateway;
 use DateInterval;
 use DateTimeImmutable;
-use Model\Book;
 use Model\BookCopy;
 use Model\Booking;
 use Model\User;
-use Service\Contracts\BookingGatewayInterface;
-use Service\Gateways\EloquentBookingGateway;
 use Throwable;
 use function Collect\collection;
 

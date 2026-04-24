@@ -1,8 +1,8 @@
 <?php
 
-namespace Service\Gateways;
+namespace app\Repositories;
 
-use Service\Contracts\AuthenticatorInterface;
+use app\Interfaces\AuthenticatorInterface;
 use Src\Auth\Auth;
 
 class NativeAuthenticator implements AuthenticatorInterface

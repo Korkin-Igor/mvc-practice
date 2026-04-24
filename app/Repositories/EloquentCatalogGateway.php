@@ -1,12 +1,12 @@
 <?php
 
-namespace Service\Gateways;
+namespace app\Repositories;
 
+use app\Interfaces\CatalogGatewayInterface;
 use Model\Book;
 use Model\BookCopy;
 use Model\BookCopyStatus;
 use Model\StoragePlace;
-use Service\Contracts\CatalogGatewayInterface;
 
 class EloquentCatalogGateway implements CatalogGatewayInterface
 {

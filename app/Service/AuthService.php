@@ -2,12 +2,11 @@
 
 namespace Service;
 
+use app\Interfaces\AuthenticatorInterface;
+use app\Interfaces\AuthUserRepositoryInterface;
+use app\Repositories\EloquentAuthUserRepository;
+use app\Repositories\NativeAuthenticator;
 use Model\User;
-use Service\Contracts\AuthenticatorInterface;
-use Service\Contracts\AuthUserRepositoryInterface;
-use Service\Gateways\EloquentAuthUserRepository;
-use Service\Gateways\NativeAuthenticator;
-use Src\Auth\Auth;
 use Throwable;
 
 class AuthService

@@ -2,14 +2,13 @@
 
 namespace Service;
 
+use app\Interfaces\CatalogGatewayInterface;
+use app\Interfaces\CoverLocatorInterface;
+use app\Repositories\EloquentCatalogGateway;
+use app\Repositories\GlobCoverLocator;
 use Model\Book;
 use Model\BookCopy;
-use Model\BookCopyStatus;
 use Model\StoragePlace;
-use Service\Contracts\CatalogGatewayInterface;
-use Service\Contracts\CoverLocatorInterface;
-use Service\Gateways\EloquentCatalogGateway;
-use Service\Gateways\GlobCoverLocator;
 use Throwable;
 use function Collect\collection;
 

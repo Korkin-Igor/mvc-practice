@@ -1,6 +1,6 @@
 <?php
 
-namespace Service\Contracts;
+namespace app\Interfaces;
 
 interface AuthUserRepositoryInterface
 {

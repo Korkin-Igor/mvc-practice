@@ -1,6 +1,6 @@
 <?php
 
-namespace Service\Contracts;
+namespace app\Interfaces;
 
 use Model\Book;
 use Model\BookCopy;

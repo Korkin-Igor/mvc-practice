@@ -1,11 +1,11 @@
 <?php
 
-namespace Service\Gateways;
+namespace app\Repositories;
 
+use app\Interfaces\BookingGatewayInterface;
 use Model\Book;
 use Model\BookCopy;
 use Model\Booking;
-use Service\Contracts\BookingGatewayInterface;
 
 class EloquentBookingGateway implements BookingGatewayInterface
 {

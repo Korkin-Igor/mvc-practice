@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
+use app\Interfaces\CatalogGatewayInterface;
+use app\Interfaces\CoverLocatorInterface;
 use Service\CatalogService;
-use Service\Contracts\CatalogGatewayInterface;
-use Service\Contracts\CoverLocatorInterface;
 use Tests\TestCase;
 
 final class CatalogServiceTest extends TestCase

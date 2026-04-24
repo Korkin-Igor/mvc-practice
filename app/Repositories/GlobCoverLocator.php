@@ -1,8 +1,8 @@
 <?php
 
-namespace Service\Gateways;
+namespace app\Repositories;
 
-use Service\Contracts\CoverLocatorInterface;
+use app\Interfaces\CoverLocatorInterface;
 
 class GlobCoverLocator implements CoverLocatorInterface
 {

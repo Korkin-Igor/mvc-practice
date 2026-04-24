@@ -1,9 +1,9 @@
 <?php
 
-namespace Service\Gateways;
+namespace app\Repositories;
 
+use app\Interfaces\AuthUserRepositoryInterface;
 use Model\User;
-use Service\Contracts\AuthUserRepositoryInterface;
 
 class EloquentAuthUserRepository implements AuthUserRepositoryInterface
 {
