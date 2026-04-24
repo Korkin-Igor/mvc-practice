@@ -7,6 +7,7 @@ use Model\BookCopy;
 use Model\BookCopyStatus;
 use Model\StoragePlace;
 use Throwable;
+use function Collect\collection;
 
 class CatalogService
 {
@@ -25,32 +26,34 @@ class CatalogService
                 });
             }
 
-            $books = [];
-            foreach ($query->get() as $book) {
-                $availableCopies = 0;
-                foreach ($book->copies as $copy) {
-                    if ((int) $copy->status_id === self::COPY_IN_ROOM) {
-                        $availableCopies++;
-                    }
-                }
+            return collection($query->get()->all())
+                ->map(function (Book $book) use ($openBookingBookIds): array {
+                    $availableCopies = 0;
 
-                $hasOpenBooking = in_array((int) $book->id, $openBookingBookIds, true);
-                $books[] = [
-                    'id' => $book->id,
-                    'name' => $book->name,
-                    'author' => $book->author ?: 'Автор не указан',
-                    'description' => $book->description ?: 'Краткое описание пока не заполнено.',
-                    'link' => $book->link,
-                    'cover_url' => $this->coverUrl((int) $book->id),
-                    'available_copies' => $availableCopies,
-                    'can_reserve' => $availableCopies > 0 && !$hasOpenBooking,
-                    'reserve_label' => $hasOpenBooking
-                        ? 'Уже в брони'
-                        : ($availableCopies > 0 ? 'Забронировать' : 'Нет экземпляров'),
-                ];
-            }
+                    collection($book->copies->all())
+                        ->each(function ($copy) use (&$availableCopies): void {
+                            if ((int) $copy->status_id === self::COPY_IN_ROOM) {
+                                $availableCopies++;
+                            }
+                        });
 
-            return $books;
+                    $hasOpenBooking = in_array((int) $book->id, $openBookingBookIds, true);
+
+                    return [
+                        'id' => $book->id,
+                        'name' => $book->name,
+                        'author' => $book->author ?: 'Автор не указан',
+                        'description' => $book->description ?: 'Краткое описание пока не заполнено.',
+                        'link' => $book->link,
+                        'cover_url' => $this->coverUrl((int) $book->id),
+                        'available_copies' => $availableCopies,
+                        'can_reserve' => $availableCopies > 0 && !$hasOpenBooking,
+                        'reserve_label' => $hasOpenBooking
+                            ? 'Уже в брони'
+                            : ($availableCopies > 0 ? 'Забронировать' : 'Нет экземпляров'),
+                    ];
+                })
+                ->toArray();
         } catch (Throwable $exception) {
             return [];
         }
@@ -59,10 +62,12 @@ class CatalogService
     public function getStorageStatuses(): array
     {
         try {
-            return BookCopyStatus::query()
-                ->orderBy('id')
-                ->pluck('name')
-                ->all();
+            return collection(
+                BookCopyStatus::query()
+                    ->orderBy('id')
+                    ->pluck('name')
+                    ->all()
+            )->toArray();
         } catch (Throwable $exception) {
             return [];
         }
@@ -91,9 +96,9 @@ class CatalogService
                 });
             }
 
-            $rows = [];
-            foreach ($query->get() as $copy) {
-                $rows[] = [
+            return collection($query->get()->all())
+                ->map(static function (BookCopy $copy): array {
+                    return [
                     'name' => $copy->book->name ?? 'Без названия',
                     'author' => $copy->book->author ?? 'Автор не указан',
                     'inventory_number' => $copy->inventory_number,
@@ -101,10 +106,9 @@ class CatalogService
                     'status' => $copy->status->name ?? 'Неизвестно',
                     'barcode' => $copy->barcode ?? '—',
                     'qr_code' => $copy->qr_code ?? '—',
-                ];
-            }
-
-            return $rows;
+                    ];
+                })
+                ->toArray();
         } catch (Throwable $exception) {
             return [];
         }
@@ -113,15 +117,14 @@ class CatalogService
     public function getStoragePlaces(): array
     {
         try {
-            $items = [];
-            foreach (StoragePlace::query()->orderBy('name')->get() as $place) {
-                $items[] = [
-                    'id' => $place->id,
-                    'name' => $place->name,
-                ];
-            }
-
-            return $items;
+            return collection(StoragePlace::query()->orderBy('name')->get()->all())
+                ->map(static function (StoragePlace $place): array {
+                    return [
+                        'id' => $place->id,
+                        'name' => $place->name,
+                    ];
+                })
+                ->toArray();
         } catch (Throwable $exception) {
             return [];
         }

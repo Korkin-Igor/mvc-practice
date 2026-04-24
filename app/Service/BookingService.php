@@ -9,6 +9,7 @@ use Model\BookCopy;
 use Model\Booking;
 use Model\User;
 use Throwable;
+use function Collect\collection;
 
 class BookingService
 {
@@ -116,15 +117,15 @@ class BookingService
     public function getReaderBookings(User $user): array
     {
         try {
-            $items = [];
-            foreach (
+            $items = collection(
                 Booking::with(['copy.book', 'copy.status', 'status'])
                     ->where('reader_id', $user->id)
                     ->orderBy('created_at', 'desc')
-                    ->get() as $booking
-            ) {
-                $items[] = $this->buildReaderBookingCard($booking);
-            }
+                    ->get()
+                    ->all()
+            )
+                ->map(fn (Booking $booking): array => $this->buildReaderBookingCard($booking))
+                ->toArray();
 
             return $this->buildReaderOverview($items);
         } catch (Throwable $exception) {
@@ -135,14 +136,14 @@ class BookingService
     public function getLibrarianBookings(): array
     {
         try {
-            $items = [];
-            foreach (
+            $items = collection(
                 Booking::with(['copy.book', 'reader', 'status'])
                     ->orderBy('created_at', 'desc')
-                    ->get() as $booking
-            ) {
-                $items[] = $this->buildLibrarianBookingCard($booking);
-            }
+                    ->get()
+                    ->all()
+            )
+                ->map(fn (Booking $booking): array => $this->buildLibrarianBookingCard($booking))
+                ->toArray();
 
             return $this->buildLibrarianOverview($items);
         } catch (Throwable $exception) {
@@ -154,7 +155,7 @@ class BookingService
     {
         $ids = [];
 
-        foreach (
+        collection(
             Booking::with('copy')
                 ->where('reader_id', $user->id)
                 ->whereIn('status_id', [
@@ -162,15 +163,18 @@ class BookingService
                     self::BOOKING_APPROVED,
                     self::BOOKING_OVERDUE,
                 ])
-                ->get() as $booking
-        ) {
+                ->get()
+                ->all()
+        )->each(function (Booking $booking) use (&$ids): void {
             $bookId = (int) ($booking->copy->book_id ?? 0);
             if ($bookId > 0) {
                 $ids[$bookId] = true;
             }
-        }
+        });
 
-        return array_map('intval', array_keys($ids));
+        return collection(array_keys($ids))
+            ->map(static fn ($id): int => (int) $id)
+            ->toArray();
     }
 
     private function approveBooking(Booking $booking, User $user): string
@@ -303,9 +307,9 @@ class BookingService
 
         return [
             'stats' => [
-                'active' => count($groups['active']),
-                'overdue' => count($groups['overdue']),
-                'pending' => count($groups['pending']),
+                'active' => collection($groups['active'])->count(),
+                'overdue' => collection($groups['overdue'])->count(),
+                'pending' => collection($groups['pending'])->count(),
             ],
             'groups' => $groups,
         ];
@@ -317,9 +321,9 @@ class BookingService
 
         return [
             'stats' => [
-                'pending' => count($groups['pending']),
-                'approved' => count($groups['active']),
-                'completed' => count($groups['completed']),
+                'pending' => collection($groups['pending'])->count(),
+                'approved' => collection($groups['active'])->count(),
+                'completed' => collection($groups['completed'])->count(),
             ],
             'groups' => $groups,
         ];
@@ -334,13 +338,13 @@ class BookingService
             'completed' => [],
         ];
 
-        foreach ($items as $item) {
+        collection($items)->each(function (array $item) use (&$groups): void {
             if (!array_key_exists($item['group'], $groups)) {
-                continue;
+                return;
             }
 
             $groups[$item['group']][] = $item;
-        }
+        });
 
         return $groups;
     }

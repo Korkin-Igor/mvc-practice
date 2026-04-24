@@ -8,6 +8,7 @@ use Src\Request;
 use Src\Session;
 use Src\View;
 use Src\Validator\Validator;
+use function Collect\collection;
 
 abstract class BaseController
 {
@@ -19,11 +20,11 @@ abstract class BaseController
     protected function validationMessage(Validator $validator): string
     {
         $messages = [];
-        foreach ($validator->errors() as $fieldErrors) {
-            foreach ($fieldErrors as $error) {
+        collection($validator->errors())->each(function (array $fieldErrors) use (&$messages): void {
+            collection($fieldErrors)->each(function (string $error) use (&$messages): void {
                 $messages[] = $error;
-            }
-        }
+            });
+        });
 
         return implode(' ', $messages);
     }

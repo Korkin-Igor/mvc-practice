@@ -7,7 +7,14 @@ $labels = [
 ];
 ?>
 <section class="surface">
-    <?php $hasBookings = array_sum(array_map('count', $bookingGroups)) > 0; ?>
+    <?php
+    $hasBookings = false;
+    \Collect\collection($bookingGroups)->each(function (array $groupItems) use (&$hasBookings): void {
+        if (\Collect\collection($groupItems)->count() > 0) {
+            $hasBookings = true;
+        }
+    });
+    ?>
     <div class="section-head">
         <div>
             <p class="eyebrow">Кабинет читателя</p>

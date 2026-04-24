@@ -14,7 +14,9 @@
         "php": "^7.4 | ^8.0",
         "illuminate/database": "13.x-dev",
         "illuminate/events": "13.x-dev",
-        "nikic/fast-route": "^2.0@dev"
+        "nikic/fast-route": "^2.0@dev",
+        "korkin-igor/collect": "dev-main",
+        "phpunit/phpunit": "^13.2@dev"
     },
     "autoload": {
         "psr-4": {
